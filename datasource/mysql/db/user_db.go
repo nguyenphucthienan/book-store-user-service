@@ -4,7 +4,7 @@ import (
 	"database/sql"
 	"fmt"
 	_ "github.com/go-sql-driver/mysql"
-	"log"
+	"github.com/nguyenphucthienan/book-store-user-service/logger"
 	"os"
 )
 
@@ -40,5 +40,5 @@ func init() {
 		panic(err)
 	}
 
-	log.Println("Database successfully configured")
+	logger.Info("Database successfully configured")
 }
