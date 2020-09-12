@@ -7,7 +7,22 @@ import (
 	"github.com/nguyenphucthienan/book-store-user-service/util/errors"
 )
 
-func GetUser(id int64) (*user.User, *errors.RestError) {
+var (
+	UserService userServiceInterface = &userService{}
+)
+
+type userService struct {
+}
+
+type userServiceInterface interface {
+	GetUser(int64) (*user.User, *errors.RestError)
+	CreateUser(user.User) (*user.User, *errors.RestError)
+	UpdateUser(bool, user.User) (*user.User, *errors.RestError)
+	DeleteUser(int64) *errors.RestError
+	SearchUserByStatus(string) (user.Users, *errors.RestError)
+}
+
+func (s *userService) GetUser(id int64) (*user.User, *errors.RestError) {
 	existingUser := user.User{Id: id}
 	if err := existingUser.Get(); err != nil {
 		return nil, err
@@ -15,7 +30,7 @@ func GetUser(id int64) (*user.User, *errors.RestError) {
 	return &existingUser, nil
 }
 
-func CreateUser(createUser user.User) (*user.User, *errors.RestError) {
+func (s *userService) CreateUser(createUser user.User) (*user.User, *errors.RestError) {
 	if err := createUser.Validate(); err != nil {
 		return nil, err
 	}
@@ -29,8 +44,8 @@ func CreateUser(createUser user.User) (*user.User, *errors.RestError) {
 	return &createUser, nil
 }
 
-func UpdateUser(isPartial bool, updateUser user.User) (*user.User, *errors.RestError) {
-	existingUser, err := GetUser(updateUser.Id)
+func (s *userService) UpdateUser(isPartial bool, updateUser user.User) (*user.User, *errors.RestError) {
+	existingUser, err := UserService.GetUser(updateUser.Id)
 	if err != nil {
 		return nil, err
 	}
@@ -60,12 +75,12 @@ func UpdateUser(isPartial bool, updateUser user.User) (*user.User, *errors.RestE
 	return existingUser, nil
 }
 
-func DeleteUser(id int64) *errors.RestError {
+func (s *userService) DeleteUser(id int64) *errors.RestError {
 	existingUser := user.User{Id: id}
 	return existingUser.Delete()
 }
 
-func FindUserByStatus(status string) (user.Users, *errors.RestError) {
+func (s *userService) SearchUserByStatus(status string) (user.Users, *errors.RestError) {
 	dao := &user.User{}
-	return dao.FindByStatus(status)
+	return dao.SearchByStatus(status)
 }
