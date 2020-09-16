@@ -10,5 +10,8 @@ var (
 
 func Start() {
 	mapUrls()
-	router.Run(":8080")
+
+	if err := router.Run("localhost:8082"); err != nil {
+		panic(err)
+	}
 }

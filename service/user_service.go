@@ -1,6 +1,7 @@
 package service
 
 import (
+	"github.com/nguyenphucthienan/book-store-oauth-service/utils/crypto_utils"
 	"github.com/nguyenphucthienan/book-store-user-service/domain/user"
 	"github.com/nguyenphucthienan/book-store-user-service/util/crypto_util"
 	"github.com/nguyenphucthienan/book-store-user-service/util/date_util"
@@ -20,6 +21,7 @@ type userServiceInterface interface {
 	UpdateUser(bool, user.User) (*user.User, *errors.RestError)
 	DeleteUser(int64) *errors.RestError
 	SearchUserByStatus(string) (user.Users, *errors.RestError)
+	LoginUser(user.LoginRequest) (*user.User, *errors.RestError)
 }
 
 func (s *userService) GetUser(id int64) (*user.User, *errors.RestError) {
@@ -83,4 +85,15 @@ func (s *userService) DeleteUser(id int64) *errors.RestError {
 func (s *userService) SearchUserByStatus(status string) (user.Users, *errors.RestError) {
 	dao := &user.User{}
 	return dao.SearchByStatus(status)
+}
+
+func (s *userService) LoginUser(request user.LoginRequest) (*user.User, *errors.RestError) {
+	dao := &user.User{
+		Email:    request.Email,
+		Password: crypto_utils.GetMd5(request.Password),
+	}
+	if err := dao.FindUserByEmailAndPassword(); err != nil {
+		return nil, err
+	}
+	return dao, nil
 }
