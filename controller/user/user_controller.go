@@ -2,6 +2,7 @@ package user
 
 import (
 	"github.com/gin-gonic/gin"
+	"github.com/nguyenphucthienan/book-store-oauth-go/oauth"
 	"github.com/nguyenphucthienan/book-store-user-service/domain/user"
 	"github.com/nguyenphucthienan/book-store-user-service/service"
 	"github.com/nguyenphucthienan/book-store-user-service/util/errors"
@@ -10,6 +11,11 @@ import (
 )
 
 func Get(c *gin.Context) {
+	if err := oauth.AuthenticateRequest(c.Request); err != nil {
+		c.JSON(err.Status, err)
+		return
+	}
+
 	userId, idErr := getUserId(c.Param("user_id"))
 	if idErr != nil {
 		c.JSON(idErr.Status, idErr)
@@ -22,7 +28,12 @@ func Get(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, returnedUser.Marshall(c.GetHeader("X-Public") == "true"))
+	if oauth.GetCallerId(c.Request) == returnedUser.Id {
+		c.JSON(http.StatusOK, returnedUser.Marshall(false))
+		return
+	}
+
+	c.JSON(http.StatusOK, returnedUser.Marshall(oauth.IsPublic(c.Request)))
 }
 
 func Create(c *gin.Context) {
