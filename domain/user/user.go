@@ -1,7 +1,7 @@
 package user
 
 import (
-	"github.com/nguyenphucthienan/book-store-user-service/util/errors"
+	"github.com/nguyenphucthienan/book-store-utils-go/errors"
 	"strings"
 )
 
@@ -21,7 +21,7 @@ type User struct {
 
 type Users []User
 
-func (user *User) Validate() *errors.RestError {
+func (user *User) Validate() errors.RestError {
 	user.FirstName = strings.TrimSpace(user.FirstName)
 	user.LastName = strings.TrimSpace(user.LastName)
 

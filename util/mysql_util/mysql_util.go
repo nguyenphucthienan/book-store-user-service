@@ -1,8 +1,9 @@
 package mysql_util
 
 import (
+	"errors"
 	"github.com/go-sql-driver/mysql"
-	"github.com/nguyenphucthienan/book-store-user-service/util/errors"
+	restErrors "github.com/nguyenphucthienan/book-store-utils-go/errors"
 	"strings"
 )
 
@@ -10,19 +11,21 @@ const (
 	ErrorNoRows = "no rows in result set"
 )
 
-func ParseError(err error) *errors.RestError {
+func ParseError(err error) restErrors.RestError {
 	sqlErr, ok := err.(*mysql.MySQLError)
 	if !ok {
 		if strings.Contains(err.Error(), ErrorNoRows) {
-			return errors.NewNotFoundError("No record matching with given id")
+			return restErrors.NewNotFoundError("No record matching with given id")
 		}
-		return errors.NewInternalServerError("Error parsing database response")
+		return restErrors.NewInternalServerError("Error parsing database response",
+			errors.New("database error"))
 	}
 
 	switch sqlErr.Number {
 	case 1062:
-		return errors.NewBadRequestError("Invalid data")
+		return restErrors.NewBadRequestError("Invalid data")
 	default:
-		return errors.NewInternalServerError("Error processing request")
+		return restErrors.NewInternalServerError("Error processing request",
+			errors.New("database error"))
 	}
 }
